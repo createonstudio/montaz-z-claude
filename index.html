@@ -1,6 +1,10 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#000002">
 <title>Montaż rolek z Claude</title>
-<meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300..700&family=Fraunces:ital,opsz,wght@1,9..144,400..600&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -27,6 +31,8 @@
   --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
 }
 * { box-sizing: border-box; }
+img { max-width: 100%; }
+body { margin: 0; }
 img { max-width: 100%; }
 [hidden] { display: none !important; }
 html { background: var(--night); }
@@ -175,6 +181,9 @@ details p { margin: 0; }
 footer { margin-top: 10vh; font-size: 14px; color: var(--faint); text-align: center; }
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
 </style>
+</head>
+<body>
+
 
 <canvas id="field" aria-hidden="true"></canvas>
 <div class="veil"></div>
@@ -256,9 +265,10 @@ footer { margin-top: 10vh; font-size: 14px; color: var(--faint); text-align: cen
         <li class="step" data-os="mac"><div class="tc">00:35</div><div>
           <span class="os-badge">macOS</span>
           <h3>Zainstaluj Node.js i dodaj go do ścieżki</h3>
-          <p>Remotion działa na Node. Druga linijka sprawia, że każdy nowy terminal, także ten, którego używa Claude, znajdzie Node.</p>
-          <div class="code"><pre>brew install node
-echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' &gt;&gt; ~/.zprofile</pre><button class="copy" type="button">Kopiuj</button></div>
+          <p>Remotion działa na Node. Pierwsze dwie linijki sprawiają, że Terminal (także ten, którego używa Claude) znajdzie Homebrew i Node, na każdym Macu: z procesorem Apple i Intel.</p>
+          <div class="code"><pre>echo 'eval "$(/opt/homebrew/bin/brew shellenv 2&gt;/dev/null || /usr/local/bin/brew shellenv)"' &gt;&gt; ~/.zprofile
+source ~/.zprofile
+brew install node</pre><button class="copy" type="button">Kopiuj</button></div>
           <p>Otwórz nowe okno Terminala i sprawdź, czy <code>node -v</code> wyświetla numer wersji.</p>
         </div></li>
 
@@ -340,7 +350,7 @@ npm i</pre><button class="copy" type="button">Kopiuj</button></div>
 
         <li class="step"><div class="tc">01:10</div><div>
           <h3>Pokaż rolkę wzorcową przed pierwszą wersją</h3>
-          <p>Wklej link do rolki, której styl Ci się podoba. Claude ogląda ją w swojej przeglądarce i przenosi układ: styl napisów, sposób wyróżniania haseł, częstotliwość wejść grafik. Pierwsza wersja zrobiona bez wzoru zwykle trafia obok; wersja oparta na wzorze jest od razu blisko końca.</p>
+          <p>Wklej link do rolki, której styl Ci się podoba, a jeśli Claude nie może go otworzyć, prześlij plik rolki albo 2–3 zrzuty ekranu. Claude przenosi z niej układ: styl napisów, sposób wyróżniania haseł, częstotliwość wejść grafik. Pierwsza wersja zrobiona bez wzoru zwykle trafia obok; wersja oparta na wzorze jest od razu blisko końca.</p>
         </div></li>
 
         <li class="step"><div class="tc">01:15</div><div>
@@ -366,11 +376,11 @@ npm i</pre><button class="copy" type="button">Kopiuj</button></div>
       <ol class="steps">
         <li class="step"><div class="tc">Start</div><div>
           <h3>Rozpoczęcie</h3>
-          <div class="code prompt"><pre>Oto moje surowe nagranie: [plik]. Mówię po [język], trwa [długość], format pionowy na Instagram Reels. To dla [marka], promuję [oferta]. Zrób transkrypcję z czasem każdego słowa modelem obsługującym [język] i poczekaj na mój wzór, zanim zaczniesz cokolwiek projektować.</pre><button class="copy" type="button">Kopiuj</button></div>
+          <div class="code prompt"><pre>Oto moje surowe nagranie: [plik]. Mówię po [język], trwa [długość], format pionowy na Instagram Reels. To dla [marka], promuję [oferta]. Zrób transkrypcję z czasem każdego słowa modelem obsługującym [język] Pokaż mi kilka pierwszych zdań transkrypcji, żebym sprawdził(a), czy słowa są poprawne, i poczekaj na mój wzór, zanim zaczniesz cokolwiek projektować.</pre><button class="copy" type="button">Kopiuj</button></div>
         </div></li>
         <li class="step"><div class="tc">Styl</div><div>
           <h3>Rolka wzorcowa</h3>
-          <div class="code prompt"><pre>Dopasuj styl do tej rolki: [link]. Napisy słowo po słowie nad moją głową, najważniejsze hasła w kilku wyrazistych stylach, dymki z cytatami przy kluczowych zdaniach. Kolory marki: [kolory]. Nigdy nie zasłaniaj mi twarzy i trzymaj wszystko z dala od krawędzi kadru.</pre><button class="copy" type="button">Kopiuj</button></div>
+          <div class="code prompt"><pre>Dopasuj styl do tej rolki: [link, plik albo zrzuty ekranu]. Napisy słowo po słowie nad moją głową, najważniejsze hasła w kilku wyrazistych stylach, dymki z cytatami przy kluczowych zdaniach. Kolory marki: [kolory]. Nigdy nie zasłaniaj mi twarzy i trzymaj wszystko z dala od krawędzi kadru.</pre><button class="copy" type="button">Kopiuj</button></div>
         </div></li>
         <li class="step"><div class="tc">Materiały</div><div>
           <h3>Materiały marki</h3>
@@ -422,7 +432,7 @@ npm i</pre><button class="copy" type="button">Kopiuj</button></div>
       <p>Claude nie słyszy, ale potrafi mierzyć. Poproś o kontrolę dźwięku przed eksportem. Najczęstszy problem to nie szum, tylko różna głośność ujęć nagranych w różnych miejscach: kilka fragmentów bywa o 10–15 dB cichszych od reszty.</p>
       <ul>
         <li><strong>Remotion potrafi tylko ściszać</strong>, nigdy powyżej 100%. Żeby podgłośnić ciche ujęcia, Claude przetwarza ścieżkę dźwiękową programem ffmpeg do nowego pliku i podmienia ją w projekcie. Oryginał zostaje nietknięty.</li>
-        <li><strong>Celuj w −14 LUFS</strong> i szczyty poniżej −1 dB, mniej więcej tak głośno Instagram odtwarza rolki.</li>
+        <li><strong>Celuj w około −14 LUFS</strong> i szczyty poniżej −1 dB. To sprawdzony punkt wyjścia, a na koniec zawsze odsłuchaj rolkę na telefonie.</li>
         <li><strong>Przesterowania w nagraniu nie da się naprawić</strong> po fakcie. Przy nagrywaniu nie ustawiaj mikrofonu za głośno.</li>
         <li>Dla brzmienia jak ze studia przepuść oryginał przez Adobe Podcast Enhance albo Auphonic i daj Claude gotowy plik.</li>
       </ul>
@@ -432,8 +442,8 @@ npm i</pre><button class="copy" type="button">Kopiuj</button></div>
       <div class="tc">02:30</div>
       <h2>Eksport</h2>
       <p>Dopóki nie wyeksportujesz, nie ma pliku wideo. Studio to tylko podgląd. Użyj przycisku <strong>Render</strong> w Studio (postęp widać w zakładce <strong>Jobs</strong>) albo tego polecenia w folderze projektu:</p>
-      <div class="code"><pre>npx remotion render MyComp out/MyComp.mp4</pre><button class="copy" type="button">Kopiuj</button></div>
-      <p>Plik pojawia się w folderze <code>out/</code>. Rolka 70-sekundowa renderuje się kilka minut i waży ok. 100 MB. Przed publikacją sprawdź jej długość.</p>
+      <div class="code"><pre>npx remotion render [nazwa-kompozycji] out/rolka.mp4</pre><button class="copy" type="button">Kopiuj</button></div>
+      <p>Zamiast <code>[nazwa-kompozycji]</code> wpisz nazwę widoczną w lewym panelu Studio albo po prostu poproś Claude o eksport. Plik pojawia się w folderze <code>out/</code>. Rolka 70-sekundowa renderuje się kilka minut i waży ok. 100 MB. Przed publikacją sprawdź jej długość.</p>
     </section>
 
     <section id="trouble">
@@ -607,4 +617,5 @@ if ('IntersectionObserver' in window) {
   }
 })();
 </script>
-</body></html>
+</body>
+</html>
