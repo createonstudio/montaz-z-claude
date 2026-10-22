@@ -1,0 +1,610 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Montaż rolek z Claude</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300..700&family=Fraunces:ital,opsz,wght@1,9..144,400..600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: the CreateOn night gallery applied to a guide. The flowing fabric
+   field sits fixed behind; the chapter menu and every chapter float over it as
+   frosted glass. Timecodes stay as the guide's own markers. One dark look. */
+:root {
+  color-scheme: dark;
+  --night: #000002;
+  --ink: #F0F0EB;
+  --soft: rgba(240, 240, 235, .74);
+  --faint: rgba(240, 240, 235, .5);
+  --glass: rgba(18, 20, 28, .72);
+  --glass-2: rgba(30, 32, 42, .55);
+  --code: rgba(6, 8, 18, .7);
+  --edge: rgba(255, 255, 255, .2);
+  --edge-soft: rgba(255, 255, 255, .09);
+  --amber: #E8A55C;
+  --blue: #8EA2FF;
+  --navy: #2A3F9E;
+  --sans: "Hanken Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --script: "Fraunces", Georgia, serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+* { box-sizing: border-box; }
+img { max-width: 100%; }
+[hidden] { display: none !important; }
+html { background: var(--night); }
+body {
+  background: var(--night); color: var(--ink);
+  font-family: var(--sans); font-size: 16px; line-height: 1.65;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 120px;
+}
+a { color: var(--amber); text-underline-offset: 3px; }
+a:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; border-radius: 6px; }
+strong { color: var(--ink); font-weight: 600; }
+
+#field { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; display: block; }
+.veil { position: fixed; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 35%, rgba(0,0,2,0) 0%, rgba(0,0,2,.55) 75%); }
+
+/* Fixed frame marks */
+.mark { position: fixed; z-index: 3; font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--ink); }
+.brand { top: calc(env(safe-area-inset-top, 0px) + 22px); left: max(24px, calc(env(safe-area-inset-left, 0px) + 16px)); display: flex; gap: 12px; align-items: center; text-decoration: none; color: var(--ink); }
+.brand svg { width: 26px; height: 14px; }
+.brand b { display: block; font-size: 13px; letter-spacing: .16em; font-weight: 700; }
+.brand span { color: var(--faint); }
+.hint { bottom: calc(env(safe-area-inset-bottom, 0px) + 20px); left: max(24px, calc(env(safe-area-inset-left, 0px) + 16px)); color: var(--soft); }
+.count { bottom: calc(env(safe-area-inset-bottom, 0px) + 20px); right: max(24px, calc(env(safe-area-inset-right, 0px) + 16px)); color: var(--soft); font-variant-numeric: tabular-nums; }
+.progress { position: fixed; z-index: 3; left: 0; right: 0; bottom: 0; height: 2px; background: rgba(255,255,255,.08); }
+.progress i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--navy), var(--amber)); }
+@media (max-width: 600px) { .hint { display: none; } }
+
+.wrap { position: relative; z-index: 2; max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 28px; padding-top: 96px; }
+@media (max-width: 900px) { .wrap { grid-template-columns: minmax(0, 1fr); gap: 20px; } }
+
+/* Chapter rail */
+nav.rail { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 90px); align-self: start; padding: 20px 18px; background: var(--glass); border: 1px solid var(--edge); border-radius: 24px; -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
+nav.rail .label { font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--faint); }
+nav.rail ol { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 2px; }
+nav.rail li a { display: grid; grid-template-columns: 46px 1fr; gap: 4px; padding: 7px 10px; border-radius: 10px; color: var(--soft); text-decoration: none; font-size: 14px; line-height: 1.35; transition: background .2s ease, color .2s ease; }
+nav.rail li a span { font-family: var(--mono); font-size: 11px; color: var(--faint); font-variant-numeric: tabular-nums; padding-top: 1px; }
+nav.rail li a:hover { background: rgba(255,255,255,.06); color: var(--ink); }
+nav.rail li a.on { background: linear-gradient(90deg, rgba(42,63,158,.45), rgba(232,165,92,.18)); color: var(--ink); }
+nav.rail li a.on span { color: var(--amber); }
+@media (max-width: 900px) {
+  nav.rail { position: static; }
+  nav.rail ol { display: flex; flex-wrap: wrap; gap: 6px; }
+  nav.rail li a { display: block; border: 1px solid var(--edge); border-radius: 999px; padding: 4px 12px; font-size: 13px; }
+  nav.rail li a span { display: none; }
+}
+
+main { min-width: 0; display: grid; gap: 28px; }
+
+/* Glass chapters */
+header.top, main > section, footer {
+  background: var(--glass); border: 1px solid var(--edge); border-radius: 24px;
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  padding: clamp(22px, 4vw, 44px); scroll-margin-top: 90px; min-width: 0;
+}
+main > section { margin-top: 10vh; }
+
+/* Hero */
+.hero-grid { display: grid; grid-template-columns: minmax(0, 1fr) 240px; gap: 32px; align-items: start; }
+@media (max-width: 700px) { .hero-grid { grid-template-columns: minmax(0, 1fr); } .hero-cover { max-width: 220px; order: -1; } }
+.hero-text { min-width: 0; display: grid; gap: 4px; }
+.hero-cover { width: 100%; border-radius: 16px; background: #fff; display: block; box-shadow: 0 20px 60px rgba(232,165,92,.18); }
+.eyebrow { font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--amber); }
+h1 { font-weight: 400; font-size: clamp(42px, 6.4vw, 78px); line-height: .98; letter-spacing: -.055em; margin: 12px 0 18px; text-wrap: balance; }
+.lede { font-size: 18px; max-width: 60ch; color: var(--soft); margin: 0; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+.meta span { border: 1px solid var(--edge); border-radius: 999px; padding: 3px 12px; font-size: 13px; color: var(--soft); }
+
+/* Timeline strip */
+.strip { margin-top: 28px; overflow-x: auto; }
+.strip ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(130px, 1fr)); gap: 8px; min-width: 780px; }
+.strip li { background: var(--glass-2); border: 1px solid var(--edge-soft); border-radius: 14px; padding: 12px 14px; font-size: 14px; line-height: 1.35; color: var(--soft); position: relative; overflow: hidden; }
+.strip li::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: var(--navy); }
+.strip li:nth-child(4)::before { background: var(--amber); }
+.strip b { display: block; font-family: var(--mono); font-weight: 500; font-size: 11px; color: var(--ink); margin-bottom: 4px; }
+
+/* Type */
+h2 { font-weight: 400; font-size: clamp(30px, 3.8vw, 44px); line-height: 1.04; letter-spacing: -.045em; margin: 8px 0 14px; text-wrap: balance; }
+h3 { font-weight: 500; font-size: 20px; letter-spacing: -.02em; margin: 0; text-wrap: balance; }
+p, li { max-width: 68ch; }
+section > p, section > ul li, .step p, .zones p { color: var(--soft); }
+section > ul { padding-left: 20px; display: grid; gap: 8px; }
+section > ul li::marker { color: var(--amber); }
+.tc { font-family: var(--mono); font-size: 11px; color: var(--amber); letter-spacing: .12em; font-variant-numeric: tabular-nums; }
+
+/* Steps */
+.steps { list-style: none; padding: 0; margin: 24px 0 0; display: grid; gap: 14px; }
+.step { max-width: none; display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 16px; padding: 18px; background: var(--glass-2); border: 1px solid var(--edge-soft); border-radius: 18px; }
+.step > .tc { padding-top: 6px; border-top: 2px solid var(--amber); align-self: start; }
+.step > div { min-width: 0; display: grid; gap: 10px; }
+.step p { margin: 0; }
+@media (max-width: 520px) { .step { grid-template-columns: minmax(0, 1fr); gap: 6px; padding: 14px; } .step > .tc { border-top: 0; padding: 0; } }
+
+/* Code */
+.code { position: relative; background: var(--code); border: 1px solid var(--edge-soft); border-radius: 12px; overflow-x: auto; }
+.code pre { margin: 0; padding: 14px 96px 14px 16px; font-family: var(--mono); font-size: 13.5px; line-height: 1.6; white-space: pre; color: #DCE2FF; }
+.code.prompt pre { white-space: pre-wrap; font-family: var(--sans); font-size: 15px; color: var(--ink); }
+.copy { position: absolute; top: 8px; right: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: .06em; color: var(--ink); background: rgba(255,255,255,.08); border: 1px solid var(--edge); border-radius: 999px; padding: 4px 12px; cursor: pointer; }
+.copy:hover { border-color: var(--amber); color: var(--amber); }
+code { font-family: var(--mono); font-size: .88em; background: rgba(255,255,255,.08); color: #DCE2FF; padding: 1px 6px; border-radius: 5px; }
+
+/* Notes */
+.note { border: 1px solid rgba(232,165,92,.35); background: rgba(232,165,92,.1); padding: 12px 16px; border-radius: 14px; max-width: 68ch; color: var(--soft); }
+.note.info { border-color: rgba(142,162,255,.35); background: rgba(42,63,158,.22); }
+.note p { margin: 0; }
+
+/* Table */
+.table { overflow-x: auto; margin-top: 16px; border: 1px solid var(--edge-soft); border-radius: 14px; }
+table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 15px; }
+th, td { text-align: left; vertical-align: top; padding: 11px 14px; border-bottom: 1px solid var(--edge-soft); color: var(--soft); }
+tr:last-child td { border-bottom: 0; }
+th { font-weight: 500; font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--faint); }
+td:first-child { white-space: nowrap; font-family: var(--mono); font-size: 13px; color: #DCE2FF; }
+
+/* Rules */
+.rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; margin-top: 22px; }
+.rule { background: var(--glass-2); border: 1px solid var(--edge-soft); border-radius: 18px; padding: 16px 18px; display: grid; gap: 6px; align-content: start; }
+.rule p { margin: 0; font-size: 15px; color: var(--soft); }
+
+/* Safe-zone diagram */
+.zones { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 28px; align-items: center; margin-top: 20px; }
+@media (max-width: 600px) { .zones { grid-template-columns: minmax(0, 1fr); justify-items: start; } }
+.phone { width: 180px; max-width: 100%; aspect-ratio: 9 / 16; border: 2px solid rgba(240,240,235,.7); border-radius: 22px; position: relative; overflow: hidden; background: rgba(6,8,18,.75); }
+.phone div { position: absolute; left: 0; right: 0; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 10px; text-align: center; padding: 2px; }
+.z-ui { background: rgba(255,255,255,.08); color: var(--faint); }
+.z-text { top: 12%; height: 10%; background: var(--navy); color: #fff; }
+.z-face { top: 22%; height: 20%; border: 1px dashed var(--amber); color: var(--amber); }
+.z-stick { top: 52%; height: 24%; left: 14% !important; right: 22% !important; background: var(--amber); color: #1a1206; border-radius: 8px; }
+.z-side { top: 45%; bottom: 20%; left: auto !important; width: 14%; background: rgba(255,255,255,.08); color: var(--faint); writing-mode: vertical-rl; }
+
+/* Troubleshooting */
+details { border-top: 1px solid var(--edge-soft); padding-block: 13px; max-width: 74ch; }
+details:last-child { border-bottom: 1px solid var(--edge-soft); }
+summary { cursor: pointer; font-weight: 500; color: var(--ink); }
+summary::marker { color: var(--amber); }
+details > div { padding-top: 8px; display: grid; gap: 10px; color: var(--soft); }
+details p { margin: 0; }
+
+/* OS switcher */
+.os-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 18px; }
+.os-tabs button { font: 500 14px var(--sans); color: var(--soft); background: rgba(255,255,255,.06); border: 1px solid var(--edge); border-radius: 999px; padding: 6px 18px; cursor: pointer; }
+.os-tabs button[aria-pressed="true"] { color: #12100A; background: var(--amber); border-color: var(--amber); }
+.os-badge { font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--blue); }
+
+footer { margin-top: 10vh; font-size: 14px; color: var(--faint); text-align: center; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+</style>
+
+<canvas id="field" aria-hidden="true"></canvas>
+<div class="veil"></div>
+<a class="mark brand" href="#overview" aria-label="Na górę strony">
+  <svg viewBox="0 0 26 14" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M1 9c3-7 6-7 8 0s5 7 8 0 6-7 8 0"/></svg>
+  <div><b>CreateOn</b><span>Studio / Webbook</span></div>
+</a>
+<div class="mark hint">Przewiń, aby przejść dalej</div>
+<div class="mark count" id="count">00 / 10</div>
+<div class="progress" aria-hidden="true"><i id="bar"></i></div>
+
+<div class="wrap">
+  <nav class="rail" aria-label="Rozdziały">
+    <div class="label">Rozdziały</div>
+    <ol>
+      <li><a href="#overview"><span>00:00</span>Na czym to polega</a></li>
+      <li><a href="#before"><span>00:15</span>Zanim zaczniesz</a></li>
+      <li><a href="#setup"><span>00:30</span>Instalacja</a></li>
+      <li><a href="#workflow"><span>01:00</span>Praca nad montażem</a></li>
+      <li><a href="#prompts"><span>01:30</span>Gotowe polecenia</a></li>
+      <li><a href="#rules"><span>02:00</span>Zasady projektowania</a></li>
+      <li><a href="#audio"><span>02:15</span>Dźwięk</a></li>
+      <li><a href="#export"><span>02:30</span>Eksport</a></li>
+      <li><a href="#trouble"><span>02:45</span>Typowe problemy</a></li>
+      <li><a href="#files"><span>03:00</span>Mapa projektu</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <header class="top" id="overview">
+      <div class="hero-grid"><div class="hero-text">
+      <div class="eyebrow">Przewodnik · Claude + Remotion</div>
+      <h1>Montuj rolki z&nbsp;Claude</h1>
+      <p class="lede">Przynosisz surowe nagranie, na którym mówisz do kamery. Claude buduje montaż w kodzie: napisy słowo po słowie, wyróżnione hasła, naklejki, wycięte zdjęcia produktów i wyrównany dźwięk. Podgląd oglądasz na żywo, a poprawki podajesz numerem klatki. Ten przewodnik opisuje instalację, sposób pracy i problemy, na które najczęściej się trafia.</p>
+      <div class="meta"><span>macOS · Windows · Linux</span><span>Claude Code</span><span>Remotion 4</span><span>ok. 1 h instalacji, jednorazowo</span></div>
+      </div><img class="hero-cover" src="c/rolki-claude.jpg" alt="Okładka: Montuj rolki z Claude"></div>
+      <div class="strip" aria-label="Etapy pracy">
+        <ol>
+          <li><b>01 Import</b>Surowy plik MP4 trafia do projektu</li>
+          <li><b>02 Transkrypcja</b>Czas każdego słowa (Whisper)</li>
+          <li><b>03 Styl</b>Dopasowanie do rolki wzorcowej</li>
+          <li><b>04 Poprawki</b>Uwagi z numerem klatki</li>
+          <li><b>05 Dźwięk</b>Wyrównanie głośności ujęć</li>
+          <li><b>06 Eksport</b>MP4 1080×1920</li>
+        </ol>
+      </div>
+    </header>
+
+    <section id="before">
+      <div class="tc">00:15</div>
+      <h2>Zanim zaczniesz</h2>
+      <ul>
+        <li><strong>Komputer z macOS, Windows 10/11 lub Linuksem</strong> i ok. 6 GB wolnego miejsca. Sam model rozpoznawania mowy zajmuje 1,5 GB, a każdy projekt rośnie do kilkuset MB.</li>
+        <li><strong>Claude Code</strong>, czyli tryb, w którym Claude może uruchamiać polecenia i edytować pliki na Twoim komputerze. Na macOS i Windows to zakładka <strong>Code</strong> w aplikacji Claude na komputer; tam Claude może też otworzyć podgląd na żywo obok czatu. Na Linuksie nie ma aplikacji na komputer, więc używasz Claude Code w terminalu albo w edytorze VS Code, a podgląd otwierasz we własnej przeglądarce.</li>
+        <li><strong>Surowe nagranie.</strong> Plik prosto z telefonu działa bez konwersji. Przewodnik zakłada format pionowy 9:16.</li>
+        <li><strong>Materiały marki</strong>: logo, zdjęcia lub okładki produktów, logotypy partnerów. Prawdziwe materiały najbardziej podnoszą jakość efektu.</li>
+      </ul>
+      <div class="note info"><p><strong>Licencja:</strong> Remotion jest darmowy dla osób prywatnych i firm do 3 osób. Większe firmy potrzebują licencji firmowej z remotion.pro.</p></div>
+    </section>
+
+    <section id="setup">
+      <div class="tc">00:30</div>
+      <h2>Instalacja (jednorazowo)</h2>
+      <p>Każde polecenie możesz wkleić sam do terminala (na macOS: Terminal, na Windows: PowerShell) albo poprosić Claude, żeby je uruchomił. Claude zapyta o zgodę, zanim cokolwiek uruchomi. Pierwsze dwa kroki zależą od systemu, dalej wszystko jest takie samo.</p>
+      <div class="os-tabs" role="group" aria-label="Wybierz system">
+        <button type="button" data-os-btn="mac" aria-pressed="true">macOS</button>
+        <button type="button" data-os-btn="win" aria-pressed="false">Windows</button>
+        <button type="button" data-os-btn="linux" aria-pressed="false">Linux</button>
+      </div>
+      <ol class="steps">
+        <li class="step" data-os="mac"><div class="tc">00:30</div><div>
+          <span class="os-badge">macOS</span>
+          <h3>Zainstaluj narzędzia Apple i Homebrew</h3>
+          <p>Pierwsza linijka instaluje narzędzia wiersza poleceń Apple (m.in. Git i kompilator, potrzebny do modelu rozpoznawania mowy). Druga instaluje Homebrew, menedżer programów na Maca. Pomiń to, co już masz: jeśli <code>git --version</code> i <code>brew -v</code> wyświetlają numery wersji.</p>
+          <div class="code"><pre>xcode-select --install
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"</pre><button class="copy" type="button">Kopiuj</button></div>
+        </div></li>
+
+        <li class="step" data-os="mac"><div class="tc">00:35</div><div>
+          <span class="os-badge">macOS</span>
+          <h3>Zainstaluj Node.js i dodaj go do ścieżki</h3>
+          <p>Remotion działa na Node. Druga linijka sprawia, że każdy nowy terminal, także ten, którego używa Claude, znajdzie Node.</p>
+          <div class="code"><pre>brew install node
+echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' &gt;&gt; ~/.zprofile</pre><button class="copy" type="button">Kopiuj</button></div>
+          <p>Otwórz nowe okno Terminala i sprawdź, czy <code>node -v</code> wyświetla numer wersji.</p>
+        </div></li>
+
+        <li class="step" data-os="win" hidden><div class="tc">00:30</div><div>
+          <span class="os-badge">Windows</span>
+          <h3>Zainstaluj Git i Node.js</h3>
+          <p>Otwórz PowerShell i zainstaluj oba programy wbudowanym menedżerem winget. Git jest potrzebny Claude Code i przy tworzeniu projektu, Node uruchamia Remotion. Możesz też pobrać instalatory ręcznie z git-scm.com i nodejs.org (wersja LTS).</p>
+          <div class="code"><pre>winget install --id Git.Git -e
+winget install --id OpenJS.NodeJS.LTS -e</pre><button class="copy" type="button">Kopiuj</button></div>
+        </div></li>
+
+        <li class="step" data-os="win" hidden><div class="tc">00:35</div><div>
+          <span class="os-badge">Windows</span>
+          <h3>Uruchom ponownie i sprawdź</h3>
+          <p>Zamknij PowerShell i aplikację Claude, otwórz je ponownie, żeby zobaczyły nowe programy. Potem sprawdź, czy oba polecenia wyświetlają numery wersji.</p>
+          <div class="code"><pre>node -v
+git --version</pre><button class="copy" type="button">Kopiuj</button></div>
+          <div class="note"><p><strong>Jeśli PowerShell pisze, że „uruchamianie skryptów jest wyłączone”</strong> przy <code>npx</code>, zezwól na lokalne skrypty dla swojego konta: <code>Set-ExecutionPolicy -Scope CurrentUser RemoteSigned</code></p></div>
+        </div></li>
+
+        <li class="step" data-os="linux" hidden><div class="tc">00:30</div><div>
+          <span class="os-badge">Linux</span>
+          <h3>Zainstaluj Git i narzędzia do kompilacji</h3>
+          <p>Kompilator jest potrzebny do modelu rozpoznawania mowy. Przykład dla Ubuntu i Debiana; w innych dystrybucjach użyj ich menedżera pakietów.</p>
+          <div class="code"><pre>sudo apt update
+sudo apt install -y git build-essential curl</pre><button class="copy" type="button">Kopiuj</button></div>
+        </div></li>
+
+        <li class="step" data-os="linux" hidden><div class="tc">00:35</div><div>
+          <span class="os-badge">Linux</span>
+          <h3>Zainstaluj Node.js w wersji LTS</h3>
+          <p>Pakiet <code>nodejs</code> z repozytorium dystrybucji bywa przestarzały. Zainstaluj aktualną wersję LTS według instrukcji na nodejs.org (Download → Linux) i sprawdź, czy <code>node -v</code> wyświetla wersję 20 lub nowszą.</p>
+        </div></li>
+
+        <li class="step"><div class="tc">00:40</div><div>
+          <h3>Załóż folder i otwórz go w Claude</h3>
+          <p>Utwórz folder na rolki. W aplikacji Claude otwórz zakładkę <strong>Code</strong> i wybierz ten folder jako folder roboczy. Na Linuksie przejdź do folderu w terminalu i uruchom tam Claude Code.</p>
+          <div class="note"><p><strong>Nazwa projektu bez spacji i polskich znaków</strong>, np. <code>rolka-01</code>. Narzędzie tworzące projekt odrzuca nazwy typu „Moje Rolki”.</p></div>
+        </div></li>
+
+        <li class="step"><div class="tc">00:45</div><div>
+          <h3>Utwórz projekt Remotion</h3>
+          <p>To tworzy pusty projekt i instaluje potrzebne pakiety.</p>
+          <div class="code"><pre>npx create-video@latest --yes --blank --no-tailwind rolka-01
+cd rolka-01
+npm i</pre><button class="copy" type="button">Kopiuj</button></div>
+        </div></li>
+
+        <li class="step"><div class="tc">00:50</div><div>
+          <h3>Dodaj umiejętności Remotion dla Claude</h3>
+          <p>Umiejętności (skills) to pakiety instrukcji, które uczą Claude pracy z Remotion: napisów, obsługi plików wideo i eksportu. Uruchom to w folderze projektu.</p>
+          <div class="code"><pre>npx skills add remotion-dev/skills</pre><button class="copy" type="button">Kopiuj</button></div>
+          <p>Trafiają do <code>.claude/skills/</code>, a Claude korzysta z nich automatycznie, gdy pracuje w tym folderze. Jeśli w katalogu wtyczek Twojej organizacji w Claude jest wtyczka Remotion, możesz ją też włączyć, ale same umiejętności projektu wystarczą.</p>
+        </div></li>
+
+        <li class="step"><div class="tc">00:55</div><div>
+          <h3>Uruchom podgląd na żywo</h3>
+          <p>Remotion Studio pokazuje film ze wszystkimi dodatkami, klatka po klatce.</p>
+          <div class="code"><pre>npx remotion studio</pre><button class="copy" type="button">Kopiuj</button></div>
+          <p>Otwiera się pod adresem <code>http://localhost:3000</code>. W zakładce Code (macOS, Windows) Claude może otworzyć go w swoim panelu przeglądarki obok czatu. W każdym systemie możesz też otworzyć ten adres we własnej przeglądarce.</p>
+        </div></li>
+      </ol>
+    </section>
+
+    <section id="workflow">
+      <div class="tc">01:00</div>
+      <h2>Praca nad montażem</h2>
+      <ol class="steps">
+        <li class="step"><div class="tc">01:00</div><div>
+          <h3>Przekaż nagranie i podaj język</h3>
+          <p>Załącz plik albo wskaż, gdzie leży, i napisz, w jakim języku mówisz. Claude skopiuje go do <code>public/</code> i ustawi długość oraz liczbę klatek na sekundę zgodnie z nagraniem.</p>
+          <div class="note"><p><strong>Zawsze podawaj język.</strong> Model rozpoznawania mowy tylko dla angielskiego, użyty na polskim nagraniu, potrafi przez pół minuty powtarzać w kółko to samo zdanie. Model wielojęzyczny radzi sobie od razu.</p></div>
+        </div></li>
+
+        <li class="step"><div class="tc">01:05</div><div>
+          <h3>Transkrypcja z czasem każdego słowa</h3>
+          <p>Claude instaluje lokalnie Whisper (<code>npx remotion add @remotion/install-whisper-cpp</code>), raz pobiera model i zapisuje moment, w którym pada każde słowo. Na tych znacznikach opiera się wszystko dalej: napisy, wejścia naklejek, zbliżenia.</p>
+        </div></li>
+
+        <li class="step"><div class="tc">01:10</div><div>
+          <h3>Pokaż rolkę wzorcową przed pierwszą wersją</h3>
+          <p>Wklej link do rolki, której styl Ci się podoba. Claude ogląda ją w swojej przeglądarce i przenosi układ: styl napisów, sposób wyróżniania haseł, częstotliwość wejść grafik. Pierwsza wersja zrobiona bez wzoru zwykle trafia obok; wersja oparta na wzorze jest od razu blisko końca.</p>
+        </div></li>
+
+        <li class="step"><div class="tc">01:15</div><div>
+          <h3>Daj prawdziwe materiały zamiast wymyślonych</h3>
+          <p>Logo, okładki produktów, logotypy partnerów, kadr do żartu. Ogólne ikonki i wymyślone przez Claude karty interfejsu najczęściej wylatują przy poprawkach. Zdjęcia na białym tle są w porządku: Claude może wyciąć tło, albo możesz od razu wysłać pliki PNG z przezroczystym tłem.</p>
+        </div></li>
+
+        <li class="step"><div class="tc">01:20</div><div>
+          <h3>Oglądaj w Studio i podawaj numery klatek</h3>
+          <p>Przewijaj film w Studio i odczytuj licznik klatek. Najlepiej działają krótkie uwagi, jedna zmiana na wiadomość:</p>
+          <div class="code prompt"><pre>520 – usuń ikonkę rakiety
+1409 – przesuń kartę z licznikiem niżej, na środek, żeby nie zasłaniała twarzy
+469 – na górze ma być napis z nazwą marki, a nie logo</pre><button class="copy" type="button">Kopiuj</button></div>
+          <p>Przy uwagach o położeniu pomaga zrzut ekranu. Przy 30 klatkach na sekundę: klatka = sekundy × 30, więc 0:18 to klatka 540.</p>
+        </div></li>
+      </ol>
+    </section>
+
+    <section id="prompts">
+      <div class="tc">01:30</div>
+      <h2>Gotowe polecenia</h2>
+      <p>Skopiuj, uzupełnij nawiasy, wyślij.</p>
+      <ol class="steps">
+        <li class="step"><div class="tc">Start</div><div>
+          <h3>Rozpoczęcie</h3>
+          <div class="code prompt"><pre>Oto moje surowe nagranie: [plik]. Mówię po [język], trwa [długość], format pionowy na Instagram Reels. To dla [marka], promuję [oferta]. Zrób transkrypcję z czasem każdego słowa modelem obsługującym [język] i poczekaj na mój wzór, zanim zaczniesz cokolwiek projektować.</pre><button class="copy" type="button">Kopiuj</button></div>
+        </div></li>
+        <li class="step"><div class="tc">Styl</div><div>
+          <h3>Rolka wzorcowa</h3>
+          <div class="code prompt"><pre>Dopasuj styl do tej rolki: [link]. Napisy słowo po słowie nad moją głową, najważniejsze hasła w kilku wyrazistych stylach, dymki z cytatami przy kluczowych zdaniach. Kolory marki: [kolory]. Nigdy nie zasłaniaj mi twarzy i trzymaj wszystko z dala od krawędzi kadru.</pre><button class="copy" type="button">Kopiuj</button></div>
+        </div></li>
+        <li class="step"><div class="tc">Materiały</div><div>
+          <h3>Materiały marki</h3>
+          <div class="code prompt"><pre>Oto moje [logo / okładki produktów / logotypy partnerów]. Kiedy mówię [nazwy produktów], niech pasująca okładka wskakuje jako mała naklejka w okolicy mojej talii, po kolei, bez nachodzenia na siebie. Usuń im białe tło.</pre><button class="copy" type="button">Kopiuj</button></div>
+        </div></li>
+        <li class="step"><div class="tc">Dźwięk</div><div>
+          <h3>Kontrola dźwięku</h3>
+          <div class="code prompt"><pre>Zmierz dźwięk: głośność, przesterowania, szum tła i różnice głośności między ujęciami. Potem wyrównaj ujęcia i ustaw całość na -14 LUFS pod Instagram, bez zmieniania oryginalnego pliku.</pre><button class="copy" type="button">Kopiuj</button></div>
+        </div></li>
+        <li class="step"><div class="tc">Koniec</div><div>
+          <h3>Eksport</h3>
+          <div class="code prompt"><pre>Wyeksportuj gotowy film w pełnej jakości. Zanim napiszesz, że gotowe, sprawdź długość i liczbę klatek na sekundę w wyeksportowanym pliku.</pre><button class="copy" type="button">Kopiuj</button></div>
+        </div></li>
+      </ol>
+    </section>
+
+    <section id="rules">
+      <div class="tc">02:00</div>
+      <h2>Zasady projektowania</h2>
+      <p>Zasady, które sprawdzają się przy każdej rolce z osobą mówiącą do kamery.</p>
+      <div class="zones">
+        <div class="phone" role="img" aria-label="Strefy kadru w pionowej rolce">
+          <div class="z-ui" style="top:0;height:10%">interfejs</div>
+          <div class="z-text">napisy</div>
+          <div class="z-face">twarz: nie zasłaniać</div>
+          <div class="z-stick">naklejki</div>
+          <div class="z-side">przyciski</div>
+          <div class="z-ui" style="bottom:0;height:18%">opis i&nbsp;interfejs</div>
+        </div>
+        <div>
+          <p>Góra i dół rolki leżą pod interfejsem Instagrama, a prawą krawędź zajmują przyciski polubień i udostępniania. Napisy idą tuż nad głowę. Naklejki, karty i zdjęcia produktów idą w dolną część środka, w okolice talii. Rozmiary stref są przybliżone.</p>
+        </div>
+      </div>
+      <div class="rules">
+        <div class="rule"><h3>Twarz jest nietykalna</h3><p>Nic na nią nie nachodzi. Gdy osoba podchodzi blisko kamery, przesuń dymek niżej.</p></div>
+        <div class="rule"><h3>Z dala od krawędzi</h3><p>Grafiki przy krawędzi kadru zasłania aplikacja albo oko je pomija.</p></div>
+        <div class="rule"><h3>Prawdziwe zamiast ogólnych</h3><p>Ogólne emoji zwykle wylatują przy poprawkach. Prawdziwe okładki produktów i logotypy partnerów działają najlepiej.</p></div>
+        <div class="rule"><h3>Jedna rzecz naraz</h3><p>Zostaw momenty bez żadnych dodatków. Przeładowana minuta czyta się gorzej niż spokojna.</p></div>
+        <div class="rule"><h3>Wykorzystaj puste kadry</h3><p>Gdy osoba wychodzi z kadru, to dobry moment na zdjęcie na cały ekran.</p></div>
+        <div class="rule"><h3>Emoji wyglądają różnie</h3><p>Każdy system rysuje emoji po swojemu. Eksportuj na tym komputerze, na którym oglądasz podgląd, albo zamiast emoji używaj naklejek-obrazków.</p></div>
+        <div class="rule"><h3>Pisownia marki</h3><p>Na starcie podaj dokładną pisownię nazwy marki, łącznie z wielkimi literami.</p></div>
+        <div class="rule"><h3>Prawa do materiałów</h3><p>Kadry z seriali lub cudze nagrania mogą skończyć się wyciszeniem albo oznaczeniem rolki. Lepiej używać własnych lub licencjonowanych zdjęć.</p></div>
+      </div>
+    </section>
+
+    <section id="audio">
+      <div class="tc">02:15</div>
+      <h2>Dźwięk</h2>
+      <p>Claude nie słyszy, ale potrafi mierzyć. Poproś o kontrolę dźwięku przed eksportem. Najczęstszy problem to nie szum, tylko różna głośność ujęć nagranych w różnych miejscach: kilka fragmentów bywa o 10–15 dB cichszych od reszty.</p>
+      <ul>
+        <li><strong>Remotion potrafi tylko ściszać</strong>, nigdy powyżej 100%. Żeby podgłośnić ciche ujęcia, Claude przetwarza ścieżkę dźwiękową programem ffmpeg do nowego pliku i podmienia ją w projekcie. Oryginał zostaje nietknięty.</li>
+        <li><strong>Celuj w −14 LUFS</strong> i szczyty poniżej −1 dB, mniej więcej tak głośno Instagram odtwarza rolki.</li>
+        <li><strong>Przesterowania w nagraniu nie da się naprawić</strong> po fakcie. Przy nagrywaniu nie ustawiaj mikrofonu za głośno.</li>
+        <li>Dla brzmienia jak ze studia przepuść oryginał przez Adobe Podcast Enhance albo Auphonic i daj Claude gotowy plik.</li>
+      </ul>
+    </section>
+
+    <section id="export">
+      <div class="tc">02:30</div>
+      <h2>Eksport</h2>
+      <p>Dopóki nie wyeksportujesz, nie ma pliku wideo. Studio to tylko podgląd. Użyj przycisku <strong>Render</strong> w Studio (postęp widać w zakładce <strong>Jobs</strong>) albo tego polecenia w folderze projektu:</p>
+      <div class="code"><pre>npx remotion render MyComp out/MyComp.mp4</pre><button class="copy" type="button">Kopiuj</button></div>
+      <p>Plik pojawia się w folderze <code>out/</code>. Rolka 70-sekundowa renderuje się kilka minut i waży ok. 100 MB. Przed publikacją sprawdź jej długość.</p>
+    </section>
+
+    <section id="trouble">
+      <div class="tc">02:45</div>
+      <h2>Typowe problemy</h2>
+      <details><summary>„node: command not found” / „node nie jest rozpoznawany”</summary><div><p>Node jest zainstalowany, ale terminal go nie widzi. Na macOS uruchom linijkę <code>echo 'eval …' &gt;&gt; ~/.zprofile</code> z kroku instalacji i otwórz nowy terminal. Na Windows zamknij i otwórz ponownie PowerShell oraz aplikację Claude.</p></div></details>
+      <details><summary>Windows: „uruchamianie skryptów jest wyłączone w tym systemie”</summary><div><p>PowerShell blokuje <code>npx</code>. Uruchom raz <code>Set-ExecutionPolicy -Scope CurrentUser RemoteSigned</code> i spróbuj ponownie.</p></div></details>
+      <details><summary>Instalacja modelu rozpoznawania mowy kończy się błędem</summary><div><p>Na macOS i Linuksie model jest kompilowany na Twoim komputerze. Upewnij się, że masz narzędzia z pierwszego kroku instalacji (<code>xcode-select --install</code> lub <code>build-essential</code>).</p></div></details>
+      <details><summary>„Cannot create an app named …”</summary><div><p>Nazwa folderu ma spacje lub znaki specjalne. Utwórz projekt w podfolderze o prostej nazwie.</p></div></details>
+      <details><summary>Transkrypcja się powtarza albo nie ma sensu</summary><div><p>Zły model językowy. Poproś Claude o ponowną transkrypcję modelem wielojęzycznym z wyraźnie ustawionym językiem.</p></div></details>
+      <details><summary>Wyeksportowany film jest o połowę krótszy</summary><div><p>Zmieniła się liczba klatek na sekundę (np. z 30 na 60), a długość została ta sama w klatkach, więc wszystko leci dwa razy szybciej, a koniec jest ucięty. Łatwo to przypadkiem przestawić w ustawieniach Studio. Poproś Claude o przywrócenie liczby klatek z oryginalnego nagrania, zwykle 30.</p></div></details>
+      <details><summary>Błyski lub czarne klatki w podglądzie</summary><div><p>Zwykle to kaprys podglądu przy dużych plikach z telefonu (np. HEVC z iPhone’a), a nie błąd w montażu. Wyeksportuj i sprawdź plik. Jeśli błyski są też w eksporcie, zanotuj numery klatek i wyślij je Claude.</p></div></details>
+      <details><summary>Claude nie może odświeżyć podglądu</summary><div><p>W jego panelu przeglądarki jest otwarte okienko, np. logowania. Zamknij je i poproś jeszcze raz.</p></div></details>
+      <details><summary>Wycinanie tła zjada kawałek produktu</summary><div><p>Białe opakowanie bywa zbyt podobne do białego tła. Poproś o ostrzejsze wycięcie albo wyślij pliki PNG z przezroczystym tłem.</p></div></details>
+    </section>
+
+    <section id="files">
+      <div class="tc">03:00</div>
+      <h2>Mapa projektu</h2>
+      <p>Co tworzy Claude, żeby było wiadomo, gdzie szukać. Nazwy plików mogą się różnić między projektami; zapytaj Claude, gdzie co jest.</p>
+      <div class="table">
+        <table>
+          <thead><tr><th>Ścieżka</th><th>Co zawiera</th></tr></thead>
+          <tbody>
+            <tr><td>public/</td><td>Nagranie, logo, okładki i wyrównany dźwięk. Wszystko, czego używa montaż.</td></tr>
+            <tr><td>src/Composition.tsx</td><td>Rozmiar, liczba klatek na sekundę i długość filmu oraz kolejność warstw.</td></tr>
+            <tr><td>src/…/timeline.ts</td><td>Każdy dodatek z czasem wejścia i zejścia w sekundach. Tu trafia większość poprawek.</td></tr>
+            <tr><td>src/…/words.json</td><td>Transkrypcja z czasem każdego słowa. Tu poprawia się literówki w napisach.</td></tr>
+            <tr><td>scripts/</td><td>Pomocnicze skrypty: transkrypcja, wycinanie tła, wyrównanie dźwięku. Do ponownego użycia.</td></tr>
+            <tr><td>out/</td><td>Wyeksportowane filmy.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note info" style="margin-top:20px"><p><strong>Kolejna rolka:</strong> skopiuj gotowy folder projektu, podmień nagranie w <code>public/</code> i poproś Claude o nową transkrypcję i nową oś czasu. Skrypty i styl przechodzą dalej.</p></div>
+    </section>
+
+    <footer>Przewodnik po montażu rolek w Claude Code z użyciem Remotion. Działa na macOS, Windows i Linuksie.</footer>
+  </main>
+</div>
+
+<script>
+(function () {
+  var btns = Array.prototype.slice.call(document.querySelectorAll('[data-os-btn]'));
+  var steps = Array.prototype.slice.call(document.querySelectorAll('[data-os]'));
+  function show(os) {
+    btns.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.osBtn === os)); });
+    steps.forEach(function (st) { st.hidden = st.dataset.os !== os; });
+  }
+  var saved = null;
+  try { saved = localStorage.getItem('os'); } catch (e) {}
+  var ua = navigator.userAgent || '';
+  var guess = /Windows/.test(ua) ? 'win' : (/Linux/.test(ua) && !/Android/.test(ua) ? 'linux' : 'mac');
+  show(saved || guess);
+  btns.forEach(function (b) {
+    b.addEventListener('click', function () {
+      show(b.dataset.osBtn);
+      try { localStorage.setItem('os', b.dataset.osBtn); } catch (e) {}
+    });
+  });
+})();
+document.querySelectorAll('.copy').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    var pre = btn.parentElement.querySelector('pre');
+    var done = function () { btn.textContent = 'Skopiowano'; setTimeout(function () { btn.textContent = 'Kopiuj'; }, 1500); };
+    var select = function () { var r = document.createRange(); r.selectNodeContents(pre); var s = getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = 'Zaznaczono'; };
+    try { navigator.clipboard.writeText(pre.innerText).then(done, select); } catch (e) { select(); }
+  });
+});
+var links = Array.prototype.slice.call(document.querySelectorAll('nav.rail a'));
+var targets = links.map(function (a) { return document.querySelector(a.getAttribute('href')); });
+if ('IntersectionObserver' in window) {
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) {
+        links.forEach(function (a) { a.classList.toggle('on', a.getAttribute('href') === '#' + e.target.id); });
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  targets.forEach(function (t) { if (t) io.observe(t); });
+}
+</script>
+
+<script>
+(function () {
+  /* Flowing fabric field: vertical folds lit amber at the centre, navy at the edges. */
+  var cv = document.getElementById('field');
+  var ctx = cv.getContext('2d');
+  var W = 0, H = 0, dpr = 1, t = 0, scrollPhase = 0;
+  var still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var NAVY = [44, 72, 200], AMBER = [250, 172, 92], DEEP = [4, 6, 22];
+
+  function size() {
+    dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    W = cv.clientWidth; H = cv.clientHeight;
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  function mix(a, b, k) { return [0, 1, 2].map(function (i) { return Math.round(a[i] + (b[i] - a[i]) * k); }); }
+  function rgb(c, a) { return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a + ')'; }
+
+  function edge(x0, y, i, ph) {
+    return x0 + Math.sin(y * 0.006 + ph + i * 0.7) * 26 + Math.sin(y * 0.013 - ph * 1.3 + i) * 12;
+  }
+
+  function draw() {
+    ctx.fillStyle = '#000002';
+    ctx.fillRect(0, 0, W, H);
+    var K = Math.max(14, Math.round(W / 46));
+    var fw = W / K * 1.9;
+    var ph = t + scrollPhase;
+    for (var i = -2; i < K + 2; i++) {
+      var x0 = i * (W / K);
+      var centre = 1 - Math.min(1, Math.abs((x0 + fw / 2) - W * 0.55) / (W * 0.55));
+      var lit = mix(NAVY, AMBER, Math.pow(centre, 1.6));
+      var top = -40;
+      ctx.beginPath();
+      var step = 18, y;
+      ctx.moveTo(edge(x0, top, i, ph), top);
+      for (y = top; y <= H + step; y += step) ctx.lineTo(edge(x0, y, i, ph), y);
+      for (y = H + step; y >= top; y -= step) ctx.lineTo(edge(x0 + fw, y, i + 0.5, ph * 0.9), y);
+      ctx.closePath();
+      var g = ctx.createLinearGradient(x0, 0, x0 + fw, 0);
+      g.addColorStop(0, rgb(DEEP, 0.95));
+      g.addColorStop(0.45, rgb(lit, 1));
+      g.addColorStop(0.6, rgb(mix(lit, [255, 230, 190], 0.25 * centre), 0.9));
+      g.addColorStop(1, rgb(DEEP, 0.95));
+      ctx.fillStyle = g;
+      ctx.fill();
+    }
+    var fade = ctx.createLinearGradient(0, 0, 0, H);
+    fade.addColorStop(0, 'rgba(0,0,2,.55)');
+    fade.addColorStop(0.3, 'rgba(0,0,2,.2)');
+    fade.addColorStop(0.7, 'rgba(0,0,2,0)');
+    fade.addColorStop(1, 'rgba(20,10,10,.35)');
+    ctx.fillStyle = fade;
+    ctx.fillRect(0, 0, W, H);
+    /* Behind the chapters the fabric dims so long text stays easy to read. */
+    if (calm > 0) { ctx.fillStyle = 'rgba(0,0,2,' + (0.5 * calm).toFixed(3) + ')'; ctx.fillRect(0, 0, W, H); }
+  }
+
+  var last = 0, calm = 0;
+  function loop(ts) {
+    /* Full movement at the top; slows to a gentle drift once reading starts. */
+    if (ts - last > 33) { var dt = last ? ts - last : 0; t += dt / 4200 * (1 - 0.85 * calm); draw(); last = ts; }
+    requestAnimationFrame(loop);
+  }
+  size();
+  window.addEventListener('resize', function () { size(); draw(); });
+  if (still) draw(); else requestAnimationFrame(loop);
+
+  /* Scroll: progress bar, fabric phase, product counter. */
+  var bar = document.getElementById('bar');
+  var count = document.getElementById('count');
+  function onScroll() {
+    var max = document.documentElement.scrollHeight - innerHeight;
+    var p = max > 0 ? scrollY / max : 0;
+    bar.style.width = (p * 100).toFixed(1) + '%';
+    calm = Math.min(1, scrollY / (innerHeight * 0.9));
+    scrollPhase = Math.min(scrollY, innerHeight) / 900;
+    if (still) draw();
+  }
+  addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  var secs = Array.prototype.slice.call(document.querySelectorAll('header.top, main > section'));
+  if ('IntersectionObserver' in window) {
+    var io2 = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { if (e.isIntersecting) { var i = secs.indexOf(e.target); count.textContent = (i < 10 ? '0' : '') + i + ' / 10'; } });
+    }, { rootMargin: '-40% 0px -55% 0px' });
+    secs.forEach(function (s) { io2.observe(s); });
+  }
+})();
+</script>
+</body></html>
